@@ -14,9 +14,9 @@ Most of the time, interface imports can be dropped because when all of the refer
 
 TypeScript 3.8 and above solves this through the syntax "import type" and "export type", implying the named identifiers being imported/exported are TypeScript types. With these annotations the transpilers can know what to drop without full context, thus enabling features like "bundling the package to be consumed by the browser while externalizing dependencies."
 
-Running this tool in a project with the example above will convert it to:
+Running this tool in a project with the example above will convert it to the follwing, moving the typing out into its own export:
 
-```
+```ts
 export { Button } from '@fluentui/react-button';
 export type { IButtonProps } from '@fluentui/react-button';
 ```
