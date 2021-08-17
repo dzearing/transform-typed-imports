@@ -17,6 +17,8 @@ export default async function transformTypedImports({
 } = {}) {
   const { writeFile } = fs.promises;
 
+  console.log("Finding source files...");
+
   let tsConfigFilePath = path.join(process.cwd(), "tsconfig.json");
 
   if (!fs.existsSync(tsConfigFilePath)) {
@@ -34,23 +36,29 @@ export default async function transformTypedImports({
   });
 
   // add source files
-  project.addSourceFilesAtPaths(["src/**/*.ts", "src/**/*.tsx"]);
+  project.addSourceFilesAtPaths(["**/src/**/*.ts", "**/src/**/*.tsx"]);
 
   const compiler = project.getLanguageService().compilerObject;
 
   let sourceFiles = project.getSourceFiles();
 
-  let matchedFiles = sourceMatch
-    ? sourceFiles.filter((s) => {
-        const isMatched = minimatch(
-          path.relative(projectPath, s.getFilePath()),
-          sourceMatch
-        );
-        //console.log("filter", s.getFilePath(), sourceMatch, isMatched);
+  let matchedFiles = sourceFiles.filter((s) => {
+    // Remove .d.ts files from files to modify, should the get into
+    // sourceFiles matched/loaded by the language service.
+    if (s.getFilePath().endsWith(".d.ts")) {
+      return false;
+    }
 
-        return isMatched;
-      })
-    : sourceFiles;
+    // If a sourceMatch is provided, use minimatch to match it against
+    // the source filepath.
+    if (sourceMatch) {
+      return minimatch(
+        path.relative(projectPath, s.getFilePath()),
+        sourceMatch
+      );
+    }
+    return true;
+  });
 
   // If we don't have source files, return.
   if (!matchedFiles?.length) {
@@ -60,7 +68,7 @@ export default async function transformTypedImports({
 
   console.log(
     `Processing ${matchedFiles.length} file(s)${
-      sourceFiles.length ? ` (Total: ${sourceFiles.length})` : ""
+      sourceFiles.length ? ` (Total parsed: ${sourceFiles.length})` : ""
     }...`
   );
 
@@ -113,10 +121,16 @@ export default async function transformTypedImports({
 
               moduleSpecifierToNamedImports[moduleSpecifier] =
                 moduleSpecifierToNamedImports[moduleSpecifier] || [];
-              moduleSpecifierToNamedImports[moduleSpecifier].push({
-                name,
-                alias,
-              });
+
+              // Push either a name string or object if alias is required.
+              moduleSpecifierToNamedImports[moduleSpecifier].push(
+                alias
+                  ? {
+                      name,
+                      alias,
+                    }
+                  : name
+              );
             }
           }
         }
@@ -166,7 +180,7 @@ export default async function transformTypedImports({
             const namedExports = (moduleSpecifierToNamedExports[
               moduleSpecifier
             ] = moduleSpecifierToNamedExports[moduleSpecifier] || []);
-            namedExports.push({ name, alias });
+            namedExports.push(alias ? { name, alias } : name);
           }
         }
       }
