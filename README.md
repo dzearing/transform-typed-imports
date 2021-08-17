@@ -4,17 +4,15 @@ A code-mod which transforms TypeScript files to be "isolatedModules" friendly.
 
 ## Motivation
 
-TypeScript transpile tools like babel and esbuild convert TypeScript into browser consumable JavaScript. In this process it is important that the tool is able to distinguish what code to drop from the output.
-
-Take for example:
+When transpilers like esbuild or babel are used to transform TypeScript into JavaScript, they have little to no visibility on the full AST and in many cases can't know whether something should be dropped or not. Take for example this statement:
 
 ```ts
-export { Button, IButtonProps } from "@fluentui/react";
+export { IButtonProps } from '@fluentui/react-button';
 ```
 
-In the example above, `Button` is an export which should emit javascript content, while `IButtonProps` is a TypeScript interface which should be removed during transpilation to JavaScript.
+Most of the time, interface imports can be dropped because when all of the references are gone, the import is inferred to be unused. Exports like the above on the other hand are impossible to drop without knowing if `IButtonProps` is a javascript export or a TypeScript export.
 
-In order for a tool to convert this file to JavaScript without having a full understanding of the AST of `@fluentui/react`, it needs imports and exports of typed things to use `import type` and `export type` syntax, which tells the transpiler explicitly what types are safe to drop.
+TypeScript 3.8 and above solves this through the syntax "import type" and "export type", implying the named identifiers being imported/exported are TypeScript types. With these annotations the transpilers can know what to drop without full context, thus enabling features like "bundling the package to be consumed by the browser while externalizing dependencies."
 
 ## Usage
 
