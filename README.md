@@ -70,4 +70,5 @@ transform-typed-imports src/**/foo.ts -d
 
 - Assumes `src` folder in project root contains TypeScript code.
 - Assumes `tsconfig.json` is located in the project root.
+- Alias imports/exports are preserved.
 - Comments are not moved with imports. You may need to manually adjust comments after modification, especially for linting disable comments that disable certain checks.
