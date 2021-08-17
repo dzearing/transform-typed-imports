@@ -13,7 +13,7 @@ In the example above, `Button` is a real JavaScript export, while `IButtonProps`
 Install globally:
 
 ```
-npm i -g tranform-typed-imports
+npm i -g transform-typed-imports
 ```
 
 Run the tool in your project folder, and it will process all TypeScript under `src`:
@@ -33,3 +33,8 @@ Dry-run only option (-d):
 ```
 transform-typed-imports src/**/foo.ts -d
 ```
+
+## Notes
+
+* Assumes `src` folder in project root contains TypeScript code.
+* Assumes `tsconfig.json` is located in the project root.
