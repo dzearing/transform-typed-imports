@@ -6,7 +6,15 @@ A code-mod which transforms TypeScript files to be "isolatedModules" friendly.
 
 TypeScript transpile tools like babel and esbuild convert TypeScript into browser consumable JavaScript. In this process it is important that the tool is able to distinguish what code to drop from the output.
 
-In the example above, `Button` is a real JavaScript export, while `IButtonProps` is a TypeScript interface which doesn't exist in the Javascript output. In order for a tool to convert this file to JavaScript without having a full understanding of the AST of `@fluentui/react`, it needs imports and exports of typed things to use `import type` and `export type`. This syntax gives enough information for the tool to drop type-only things from the JavaScript output.
+Take for example:
+
+```ts
+export { Button, IButtonProps } from "@fluentui/react";
+```
+
+In the example above, `Button` is an export which should emit javascript content, while `IButtonProps` is a TypeScript interface which should be removed during transpilation to JavaScript.
+
+In order for a tool to convert this file to JavaScript without having a full understanding of the AST of `@fluentui/react`, it needs imports and exports of typed things to use `import type` and `export type` syntax, which tells the transpiler explicitly what types are safe to drop.
 
 ## Usage
 
@@ -36,6 +44,6 @@ transform-typed-imports src/**/foo.ts -d
 
 ## Notes
 
-* Assumes `src` folder in project root contains TypeScript code.
-* Assumes `tsconfig.json` is located in the project root.
-* Comments are not moved with imports. You may need to manually adjust comments after modification, especially for linting disable comments that disable certain checks.
+- Assumes `src` folder in project root contains TypeScript code.
+- Assumes `tsconfig.json` is located in the project root.
+- Comments are not moved with imports. You may need to manually adjust comments after modification, especially for linting disable comments that disable certain checks.
