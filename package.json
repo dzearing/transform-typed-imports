@@ -1,0 +1,17 @@
+{
+  "name": "transform-typed-imports",
+  "version": "0.0.1",
+  "description": "A code-mod which modifies interface/type imports/exports to use the new `import type` feature introduced in TS 3.8.",
+  "author": "David Zearing",
+  "license": "MIT",
+  "module": "./transformTypedImports.mjs",
+  "preferGlobal": true,
+  "bin": {
+    "transform-typed-imports": "./bin/cli.mjs"
+  },
+  "dependencies": {
+    "minimatch": "^3.0.4",
+    "ts-morph": "^11.0.3",
+    "yargs": "^17.1.1"
+  }
+}
