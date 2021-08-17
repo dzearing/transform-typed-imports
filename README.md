@@ -1,6 +1,6 @@
 # transform-typed-imports
 
-A code-mod which transforms TypeScript files to be "isolatedModules" friendly.
+A code-mod which transforms TypeScript files to move imports/exports of typings to use `import type`/`export type`, allowing the package to become `isolatedModules` friendly.
 
 ## Motivation
 
