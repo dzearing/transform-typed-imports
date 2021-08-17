@@ -28,7 +28,7 @@ Run it on a specific match:
 transform-typed-imports src/**/foo.ts
 ```
 
-Dry-run only option (-d):
+`-d` - Dry-run only option (-d) prints output to console rather than writing changes back to the file:
 
 ```
 transform-typed-imports src/**/foo.ts -d
@@ -38,3 +38,4 @@ transform-typed-imports src/**/foo.ts -d
 
 * Assumes `src` folder in project root contains TypeScript code.
 * Assumes `tsconfig.json` is located in the project root.
+* Comments are not moved with imports. You may need to manually adjust comments after modification, especially for linting disable comments that disable certain checks.
