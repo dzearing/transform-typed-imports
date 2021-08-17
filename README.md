@@ -2,7 +2,7 @@
 
 A code-mod which transforms TypeScript files to move imports/exports of typings to use `import type`/`export type`, allowing the package to become `isolatedModules` friendly.
 
-Converts this (a class and an interface export):
+Converts this (a class and an interface import and export):
 
 ```ts
 import { Checkbox, CheckboxProps } from '@fluentui/react-checkbox';
