@@ -20,6 +20,14 @@ export { Button } from '@fluentui/react-button';
 export type { IButtonProps } from '@fluentui/react-button';
 ```
 
+...which in turn lets transpilers transform your TypeScript into the appropriate JavaScript without knowing the types of the external dependencies:
+
+```js
+import { Checkbox } from '@fluentui/react-checkbox';
+// ...
+export { Button } from '@fluentui/react-button';
+```
+
 ## Motivation
 
 When transpilers like esbuild or babel are used to transform TypeScript into JavaScript, they have little to no visibility on the full AST and in many cases can't know whether something should be dropped or not. Take for example this statement:
