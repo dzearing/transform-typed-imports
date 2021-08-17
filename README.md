@@ -28,7 +28,7 @@ When transpilers like esbuild or babel are used to transform TypeScript into Jav
 export { Button, IButtonProps } from '@fluentui/react-button';
 ```
 
-Most of the time, interface imports are dropped because removing TypeScript from the code means the import is inferred to be unused. Exports like the above on the other hand are impossible to drop without knowing if `IButtonProps` is a JavaScript export or a TypeScript export.
+Most of the time, interface imports are dropped because removing TypeScript from the code means the import is inferred to be unused. Cross-package interface exports like the above `IButtonProps` on the other hand are impossible to drop without parsing the AST of the external package to discover if `IButtonProps` is a JavaScript export or a TypeScript export.
 
 TypeScript 3.8 and above solves this through the syntax `import type` and `export type`, implying the named identifiers being imported/exported are TypeScript types. With these annotations the transpilers can know what to drop without full context, thus enabling features like "bundling the package to be consumed by the browser while externalizing dependencies."
 
