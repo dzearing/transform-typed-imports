@@ -7,7 +7,7 @@ Converts this (a class and an interface import and export):
 ```ts
 import { Checkbox, CheckboxProps } from '@fluentui/react-checkbox';
 // ...
-export { Button, IButtonProps } from '@fluentui/react-button';
+export { Button, ButtonProps } from '@fluentui/react-button';
 ```
 
 To this (separting JavaScript and TypeScript imports/exports explicitly):
@@ -17,7 +17,7 @@ import { Checkbox } from '@fluentui/react-checkbox';
 import type { CheckboxProps } from '@fluentui/react-checkbox';
 // ...
 export { Button } from '@fluentui/react-button';
-export type { IButtonProps } from '@fluentui/react-button';
+export type { ButtonProps } from '@fluentui/react-button';
 ```
 
 ...which in turn lets transpilers transform your TypeScript into the appropriate JavaScript without knowing the types of the external dependencies:
