@@ -1,6 +1,6 @@
 {
   "name": "transform-typed-imports",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A code-mod which modifies interface/type imports/exports to use the new `import type` feature introduced in TS 3.8.",
   "author": "David Zearing",
   "license": "MIT",

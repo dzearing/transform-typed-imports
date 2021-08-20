@@ -2,7 +2,8 @@
 
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import transformTypedImports, {
+import {
+  transformTypedImports,
   TransformTypedImportsOptions,
 } from "./transformTypedImports";
 
