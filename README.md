@@ -84,3 +84,4 @@ transform-typed-imports -s
 - Assumes `tsconfig.json` is located in the project root.
 - Alias imports/exports are preserved.
 - Comments are not moved with imports. You may need to manually adjust comments after modification, especially for linting disable comments that disable certain checks.
+- In mono-repo cases where linked packages may refer to the JavaScript output in `/lib` folders, it's important for the project to be fully built first for the language service to accurately parse typings. Don't run the tool on a repo that hasn't been built first.
