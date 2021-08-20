@@ -53,7 +53,7 @@ export interface TransformTypedImportsResult {
  * project has TypeScript files under the /src folder. Will also assume
  * tsconfig.json is in the project root, and will use it if found.
  */
-export default async function transformTypedImports(
+export async function transformTypedImports(
   options: TransformTypedImportsOptions = {}
 ): Promise<TransformTypedImportsResult> {
   const {
