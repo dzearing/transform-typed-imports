@@ -1,0 +1,8 @@
+{
+  "name": "test-transform-typed-imports",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "foo": "0.0.0"
+  }
+}

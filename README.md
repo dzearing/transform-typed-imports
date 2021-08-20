@@ -18,10 +18,16 @@ In order for a tool to convert this file to JavaScript without having a full und
 
 ## Usage
 
-Install globally:
+Installation:
 
 ```
 npm i -g transform-typed-imports
+```
+
+Usage:
+
+```
+transform-typed-imports <match> [-d] [-s]
 ```
 
 Run the tool in your project folder, and it will process all TypeScript under `src`:
@@ -40,6 +46,12 @@ transform-typed-imports src/**/foo.ts
 
 ```
 transform-typed-imports src/**/foo.ts -d
+```
+
+`-s` - Run in silent mode (no console logging.)
+
+```
+transform-typed-imports -s
 ```
 
 ## Notes

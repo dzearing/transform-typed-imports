@@ -1,25 +1,89 @@
 import fs from "fs";
 import path from "path";
-import { ModuleResolutionKind, Project, SyntaxKind } from "ts-morph";
+import {
+  ExportDeclarationStructure,
+  ModuleResolutionKind,
+  OptionalKind,
+  Project,
+  SyntaxKind,
+} from "ts-morph";
 import minimatch from "minimatch";
 
 const divider = "--------------------------------------------------";
+const emptyModuleSpecifier = "/undefined/";
+
+export interface TransformTypedImportsOptions {
+  /**
+   * Root of the project, defaults to process.cwd();
+   */
+  projectPath?: string;
+
+  /**
+   * Dry run only, emits source output to console rather than to disk.
+   */
+  dry?: boolean;
+
+  /**
+   * Silent mode, don't log to console.log.
+   */
+  silent?: boolean;
+
+  /**
+   * Glob match to apply transforms to.
+   */
+  sourceMatch?: string;
+}
+
+export interface TransformTypedImportsChangeEntry {
+  path: string;
+  originalContent: string;
+  newContent: string | undefined;
+}
+
+export interface TransformTypedImportsResult {
+  options: TransformTypedImportsOptions;
+  log: any[];
+  filesParsed: string[];
+  filesMatched: string[];
+  updates: TransformTypedImportsChangeEntry[];
+}
 
 /**
  * Transforms the imports/exports for the current project. Assumes the
  * project has TypeScript files under the /src folder. Will also assume
  * tsconfig.json is in the project root, and will use it if found.
  */
-export default async function transformTypedImports({
-  projectPath = process.cwd(),
-  dry = false,
-  sourceMatch,
-} = {}) {
-  const { writeFile } = fs.promises;
+export default async function transformTypedImports(
+  options: TransformTypedImportsOptions = {}
+): Promise<TransformTypedImportsResult> {
+  const {
+    projectPath = process.cwd(),
+    dry = false,
+    sourceMatch = "",
+    silent = false,
+  } = options;
+  const result: TransformTypedImportsResult = {
+    options,
+    log: [],
+    filesParsed: [],
+    filesMatched: [],
+    updates: [],
+  };
 
-  console.log("Finding source files...");
+  const log = (...messages: any[]) => {
+    if (!silent) {
+      console.log(...messages);
+    }
 
-  let tsConfigFilePath = path.join(process.cwd(), "tsconfig.json");
+    result.log.push(...messages);
+  };
+
+  log("Finding source files...");
+
+  let tsConfigFilePath: string | undefined = path.join(
+    projectPath,
+    "tsconfig.json"
+  );
 
   if (!fs.existsSync(tsConfigFilePath)) {
     tsConfigFilePath = undefined;
@@ -29,6 +93,7 @@ export default async function transformTypedImports({
   const project = new Project({
     // Read more: https://ts-morph.com/setup/
     tsConfigFilePath,
+    skipAddingFilesFromTsConfig: true,
     compilerOptions: {
       moduleResolution: ModuleResolutionKind.NodeJs,
       jsx: 4,
@@ -36,15 +101,16 @@ export default async function transformTypedImports({
   });
 
   // add source files
-  project.addSourceFilesAtPaths(["**/src/**/*.ts", "**/src/**/*.tsx"]);
+  project.addSourceFilesAtPaths([
+    path.join(projectPath, "src/**/*.ts"),
+    path.join(projectPath, "src/**/*.tsx"),
+  ]);
 
   const compiler = project.getLanguageService().compilerObject;
-
-  let sourceFiles = project.getSourceFiles();
-
-  let matchedFiles = sourceFiles.filter((s) => {
-    // Remove .d.ts files from files to modify, should the get into
-    // sourceFiles matched/loaded by the language service.
+  let filesParsed = project.getSourceFiles();
+  let filesMatched = filesParsed.filter((s) => {
+    // Remove .d.ts files from files to modify, should they be loaded as
+    // sourceFiles by the language service.
     if (s.getFilePath().endsWith(".d.ts")) {
       return false;
     }
@@ -60,27 +126,44 @@ export default async function transformTypedImports({
     return true;
   });
 
+  // Track parsed/matched in result.
+  result.filesParsed =
+    filesParsed?.map((s) => path.normalize(s.getFilePath())) || [];
+  result.filesMatched =
+    filesMatched?.map((s) => path.normalize(s.getFilePath())) || [];
+
   // If we don't have source files, return.
-  if (!matchedFiles?.length) {
-    console.log(`No source files matched.`);
-    return;
+  if (!filesMatched?.length) {
+    log(`No source files matched.`);
+    return result;
   }
 
-  console.log(
-    `Processing ${matchedFiles.length} file(s)${
-      sourceFiles.length ? ` (Total parsed: ${sourceFiles.length})` : ""
+  log(
+    `Processing ${filesMatched.length} file(s)${
+      filesParsed.length ? ` (Total parsed: ${filesParsed.length})` : ""
     }...`
   );
 
   // For each source file...
-  for (let source of matchedFiles) {
-    console.log(`\nParsing source: "${source.getFilePath()}"\n${divider}`);
+  for (let source of filesMatched) {
+    log(`\nParsing source: "${source.getFilePath()}"\n${divider}`);
 
     const filePath = source.getFilePath();
+    const changeEntry: TransformTypedImportsChangeEntry = {
+      path: filePath,
+      originalContent: source.getText(),
+      newContent: undefined,
+    };
 
     let hasChanged = false;
-    const moduleSpecifierToNamedImports = {};
-    const moduleSpecifierToNamedExports = {};
+    const moduleSpecifierToNamedImports: Record<
+      string,
+      (string | { name: string; alias: string })[]
+    > = {};
+    const moduleSpecifierToNamedExports: Record<
+      string,
+      (string | { name: string; alias: string })[]
+    > = {};
 
     // ...Iterate through imports;
     for (let decl of source.getImportDeclarations()) {
@@ -90,7 +173,8 @@ export default async function transformTypedImports({
 
         // ...If the clause is not a typed import,
         if (!isTypeClause) {
-          const moduleSpecifier = decl.getModuleSpecifierValue();
+          const moduleSpecifier =
+            decl.getModuleSpecifierValue() || emptyModuleSpecifier;
 
           // Iterate through the named imports
           for (const importSpecifier of decl.getNamedImports()) {
@@ -98,13 +182,13 @@ export default async function transformTypedImports({
             const alias = importSpecifier.getAliasNode()?.getText();
 
             const definitions = compiler.getDefinitionAtPosition(
-              source.getFilePath(),
-              importSpecifier.getStart() + 1
+              filePath,
+              importSpecifier.getStart()
             );
 
             // If the definition is a typed definition,
             if (
-              definitions.find(
+              definitions?.find(
                 (d) => d.kind === "interface" || d.kind === "type"
               )
             ) {
@@ -113,11 +197,11 @@ export default async function transformTypedImports({
               importSpecifier.remove();
 
               // If this is the last named import, remove the import declaration.
-              if (!decl.getNamedImports()?.length) {
+              if (!decl.getNamedImports()?.length && !decl.getDefaultImport()) {
                 decl.remove();
               }
 
-              console.log(`* Removing import ${name} from ${moduleSpecifier}`);
+              log(`* Removing import ${name} from ${moduleSpecifier}`);
 
               moduleSpecifierToNamedImports[moduleSpecifier] =
                 moduleSpecifierToNamedImports[moduleSpecifier] || [];
@@ -146,21 +230,18 @@ export default async function transformTypedImports({
           const name = clause.getNameNode().getText();
           const alias = clause.getAliasNode()?.getText();
 
-          const moduleSpecifier = clause
-            .getExportDeclaration()
-            .getModuleSpecifierValue();
+          const moduleSpecifier =
+            clause.getExportDeclaration().getModuleSpecifierValue() ||
+            emptyModuleSpecifier;
 
           const definitions = compiler.getDefinitionAtPosition(
             source.getFilePath(),
-            clause.getStart() + 1
+            clause.getStart()
           );
 
           const kind = definitions?.find(
-            (d) =>
-              d.kind === "interface" || d.kind === "type" || d.kind === "alias"
+            (d) => d.kind === "interface" || d.kind === "type"
           )?.kind;
-
-          // console.log("export", name, alias, definitions, clause.getStart());
 
           // If this is a typed export,
           if (kind) {
@@ -173,9 +254,7 @@ export default async function transformTypedImports({
               clause.remove();
             }
             // If this is the last named export, remove the declaration.
-            console.log(
-              `* Removing export ${name} (${kind}) from ${moduleSpecifier}`
-            );
+            log(`* Removing export ${name} (${kind}) from ${moduleSpecifier}`);
 
             const namedExports = (moduleSpecifierToNamedExports[
               moduleSpecifier
@@ -192,9 +271,9 @@ export default async function transformTypedImports({
       for (const moduleSpecifier of Object.keys(
         moduleSpecifierToNamedImports
       )) {
-        console.log(
+        log(
           `* Adding imports for ${moduleSpecifier}:`,
-          moduleSpecifierToNamedImports[moduleSpecifier]
+          moduleSpecifierToNamedImports[moduleSpecifier] as any
         );
         source.addImportDeclaration({
           isTypeOnly: true,
@@ -207,31 +286,37 @@ export default async function transformTypedImports({
       for (const moduleSpecifier of Object.keys(
         moduleSpecifierToNamedExports
       )) {
-        console.log(
+        log(
           `* Adding exports for ${moduleSpecifier}:`,
           moduleSpecifierToNamedExports[moduleSpecifier]
         );
-        const decl = {
+        const decl: OptionalKind<ExportDeclarationStructure> = {
           isTypeOnly: true,
           namedExports: moduleSpecifierToNamedExports[moduleSpecifier],
         };
 
-        if (moduleSpecifier !== "undefined") {
+        if (moduleSpecifier !== emptyModuleSpecifier) {
           decl.moduleSpecifier = moduleSpecifier;
         }
 
         source.addExportDeclaration(decl);
       }
 
+      // Update the change entry.
+      changeEntry.newContent = source.getText();
+      result.updates.push(changeEntry);
+
       if (dry) {
-        console.log(
+        log(
           `\nPrinting source file "${source.getFilePath()}":\n${divider}\n${source.getText()}${divider}`
         );
       } else {
         // Save the source.
-        console.log(`\nSaving source file "${source.getFilePath()}"`);
+        log(`\nSaving source file "${source.getFilePath()}"`);
         await source.save();
       }
     }
   }
+
+  return result;
 }

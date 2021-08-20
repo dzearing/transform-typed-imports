@@ -1,17 +1,30 @@
 {
   "name": "transform-typed-imports",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A code-mod which modifies interface/type imports/exports to use the new `import type` feature introduced in TS 3.8.",
   "author": "David Zearing",
   "license": "MIT",
-  "module": "./transformTypedImports.mjs",
-  "preferGlobal": true,
+  "main": "./lib-commonjs/transformTypedImports.mjs",
+  "types": "./lib-commonjs/transformTypedImports.d.ts",
   "bin": {
-    "transform-typed-imports": "./bin/cli.mjs"
+    "transform-typed-imports": "./lib-commonjs/cli.mjs"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "watch": "tsc -w & jest"
   },
   "dependencies": {
+    "@types/jest": "^27.0.1",
     "minimatch": "^3.0.4",
     "ts-morph": "^11.0.3",
     "yargs": "^17.1.1"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.4",
+    "@types/minimatch": "^3.0.5",
+    "glob": "^7.1.7",
+    "jest": "^27.0.6",
+    "typescript": "^4.3.5"
   }
 }

@@ -1,0 +1,160 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`transformTypedImports produces expected output for test-exports-3.ts: newContent 1`] = `
+"export type { IFoo } from \\"foo\\";
+"
+`;
+
+exports[`transformTypedImports produces expected output for test-exports-3.ts: originalContent 1`] = `
+"export { IFoo } from \\"foo\\";
+"
+`;
+
+exports[`transformTypedImports produces expected output for test-exports-4.ts: newContent 1`] = `
+"export { foo } from \\"foo\\";
+export type { IFoo } from \\"foo\\";
+"
+`;
+
+exports[`transformTypedImports produces expected output for test-exports-4.ts: originalContent 1`] = `
+"export { foo, IFoo } from \\"foo\\";
+"
+`;
+
+exports[`transformTypedImports produces expected output for test-exports-5.ts: newContent 1`] = `
+"export type { IFoo } from \\"foo\\";
+"
+`;
+
+exports[`transformTypedImports produces expected output for test-exports-5.ts: originalContent 1`] = `
+"export { IFoo } from \\"foo\\";
+"
+`;
+
+exports[`transformTypedImports produces expected output for test-exports-6.ts: newContent 1`] = `
+"export { default, bar } from \\"foo\\";
+export type { IFoo } from \\"foo\\";
+"
+`;
+
+exports[`transformTypedImports produces expected output for test-exports-6.ts: originalContent 1`] = `
+"export { default, bar, IFoo } from \\"foo\\";
+"
+`;
+
+exports[`transformTypedImports produces expected output for test-exports-7.ts: newContent 1`] = `
+"export type { IFoo as default } from \\"foo\\";
+"
+`;
+
+exports[`transformTypedImports produces expected output for test-exports-7.ts: originalContent 1`] = `
+"export { IFoo as default } from \\"foo\\";
+"
+`;
+
+exports[`transformTypedImports produces expected output for test-exports-8.ts: newContent 1`] = `
+"export type { IFoo as Foo } from \\"foo\\";
+"
+`;
+
+exports[`transformTypedImports produces expected output for test-exports-8.ts: originalContent 1`] = `
+"export { IFoo as Foo } from \\"foo\\";
+"
+`;
+
+exports[`transformTypedImports produces expected output for test-imports-3.ts: newContent 1`] = `
+"import type { IFoo } from \\"foo\\";
+
+// Test: Just a type import
+
+export default function test(foo: IFoo) {
+  console.log(foo);
+}
+"
+`;
+
+exports[`transformTypedImports produces expected output for test-imports-3.ts: originalContent 1`] = `
+"import { IFoo } from \\"foo\\";
+
+export default function test(foo: IFoo) {
+  console.log(foo);
+}
+"
+`;
+
+exports[`transformTypedImports produces expected output for test-imports-4.ts: newContent 1`] = `
+"import { foo } from \\"foo\\";
+import type { IFoo } from \\"foo\\";
+
+export default function test(f: IFoo) {
+  console.log(f, foo);
+}
+"
+`;
+
+exports[`transformTypedImports produces expected output for test-imports-4.ts: originalContent 1`] = `
+"import { foo, IFoo } from \\"foo\\";
+
+export default function test(f: IFoo) {
+  console.log(f, foo);
+}
+"
+`;
+
+exports[`transformTypedImports produces expected output for test-imports-5.ts: newContent 1`] = `
+"import foo, { bar } from \\"foo\\";
+import type { IFoo } from \\"foo\\";
+
+export default function test(f: IFoo) {
+  console.log(f, foo, bar);
+}
+"
+`;
+
+exports[`transformTypedImports produces expected output for test-imports-5.ts: originalContent 1`] = `
+"import foo, { bar, IFoo } from \\"foo\\";
+
+export default function test(f: IFoo) {
+  console.log(f, foo, bar);
+}
+"
+`;
+
+exports[`transformTypedImports produces expected output for test-imports-6.ts: newContent 1`] = `
+"import type { IFoo as Foo } from \\"foo\\";
+
+// Test: aliased type imports
+
+export default function test(foo: Foo) {
+  console.log(foo);
+}
+"
+`;
+
+exports[`transformTypedImports produces expected output for test-imports-6.ts: originalContent 1`] = `
+"import { IFoo as Foo } from \\"foo\\";
+
+export default function test(foo: Foo) {
+  console.log(foo);
+}
+"
+`;
+
+exports[`transformTypedImports produces expected output for test-imports-7.ts: newContent 1`] = `
+"import foo from \\"foo\\";
+import type { IFoo } from \\"foo\\";
+
+export default function test(f: IFoo) {
+  console.log(f, foo);
+}
+"
+`;
+
+exports[`transformTypedImports produces expected output for test-imports-7.ts: originalContent 1`] = `
+"import foo, { IFoo } from \\"foo\\";
+
+export default function test(f: IFoo) {
+  console.log(f, foo);
+}
+"
+`;
