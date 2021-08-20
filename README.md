@@ -51,7 +51,7 @@ npm i -g transform-typed-imports
 Usage:
 
 ```
-transform-typed-imports <match> [-d] [-s]
+transform-typed-imports [match] [-d] [-s]
 ```
 
 Run the tool in your project folder, and it will process all TypeScript under `src`:
