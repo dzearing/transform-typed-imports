@@ -2,15 +2,23 @@
 
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import transformTypedImports from "../transformTypedImports.mjs";
+import transformTypedImports, {
+  TransformTypedImportsOptions,
+} from "./transformTypedImports";
 
 const argv = yargs(hideBin(process.argv))
-  .command("* [sourceMatch] [-d]")
+  .command("* [sourceMatch] [-d]" as any)
   .option("d", {
     alias: "dry",
     default: false,
     type: "boolean",
     describe: "Dry run.",
+  })
+  .option("s", {
+    alias: "silent",
+    default: false,
+    type: "boolean",
+    describe: "Silent mode. Avoids logging to the console.",
   })
   .example(
     "$0 src/**/*.{ts|tsx}",
@@ -19,4 +27,4 @@ const argv = yargs(hideBin(process.argv))
   .help("h")
   .alias("h", "help").argv;
 
-await transformTypedImports(argv);
+transformTypedImports(argv as TransformTypedImportsOptions);
