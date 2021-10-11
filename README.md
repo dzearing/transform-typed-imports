@@ -1,5 +1,9 @@
 # transform-typed-imports
 
+> :warning: :warning: :warning:
+> 
+> Note: this transform codemod will be superceded by an eslint rule. The issue is tracked here: https://github.com/typescript-eslint/typescript-eslint/issues/3597 (see attached PR for current status and give it an upvote.)
+
 A code-mod which transforms TypeScript files to move imports/exports of typings to use `import type`/`export type`, allowing the package to become `isolatedModules` friendly.
 
 Converts this (a class and an interface import and export):
